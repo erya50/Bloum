@@ -1,26 +1,40 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  /* BLOUM brand palette, derived from the logo */
+  --color-blush: #e8b4c0;
+  --color-blush-light: #f5ddE2;
+  --color-sage: #a8c3a0;
+  --color-sage-light: #e0ebdc;
+  --color-lavender: #c7b8d9;
+  --color-lavender-light: #ebe4f2;
+  --color-sand: #d4b896;
+  --color-sand-light: #f0e3d0;
+  --color-ink: #2b2a28;
+  --color-cream: #fbf6ef;
+
+  --background: var(--color-cream);
+  --foreground: var(--color-ink);
 }
 
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
+  --color-blush: var(--color-blush);
+  --color-blush-light: var(--color-blush-light);
+  --color-sage: var(--color-sage);
+  --color-sage-light: var(--color-sage-light);
+  --color-lavender: var(--color-lavender);
+  --color-lavender-light: var(--color-lavender-light);
+  --color-sand: var(--color-sand);
+  --color-sand-light: var(--color-sand-light);
+  --color-ink: var(--color-ink);
+  --color-cream: var(--color-cream);
   --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-serif: var(--font-playfair);
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
 }

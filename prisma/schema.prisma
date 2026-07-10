@@ -1,0 +1,196 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum Role {
+  CUSTOMER
+  ADMIN
+}
+
+enum EventType {
+  ONLINE
+  OFFLINE
+}
+
+enum BookingStatus {
+  PENDING
+  CONFIRMED
+  CANCELED
+}
+
+enum OrderStatus {
+  PENDING
+  PAID
+  CANCELED
+}
+
+model User {
+  id           String   @id @default(cuid())
+  email        String   @unique
+  passwordHash String
+  name         String
+  role         Role     @default(CUSTOMER)
+  createdAt    DateTime @default(now())
+
+  sessions      Session[]
+  enrollments   Enrollment[]
+  lessonProgress LessonProgress[]
+  eventBookings EventBooking[]
+  orders        Order[]
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+model Course {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  coverImage  String
+  priceCents  Int
+  category    String
+  level       String
+  isPublished Boolean  @default(true)
+  createdAt   DateTime @default(now())
+
+  modules     Module[]
+  enrollments Enrollment[]
+}
+
+model Module {
+  id       String @id @default(cuid())
+  courseId String
+  title    String
+  order    Int
+
+  course  Course   @relation(fields: [courseId], references: [id], onDelete: Cascade)
+  lessons Lesson[]
+
+  @@index([courseId])
+}
+
+model Lesson {
+  id          String  @id @default(cuid())
+  moduleId    String
+  title       String
+  videoKey    String?
+  content     String
+  order       Int
+  durationMin Int
+
+  module   Module           @relation(fields: [moduleId], references: [id], onDelete: Cascade)
+  progress LessonProgress[]
+
+  @@index([moduleId])
+}
+
+model Enrollment {
+  id              String   @id @default(cuid())
+  userId          String
+  courseId        String
+  purchasedAt     DateTime @default(now())
+  stripeSessionId String   @unique
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  course Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, courseId])
+}
+
+model LessonProgress {
+  id          String    @id @default(cuid())
+  userId      String
+  lessonId    String
+  completedAt DateTime  @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  lesson Lesson @relation(fields: [lessonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, lessonId])
+}
+
+model Event {
+  id          String    @id @default(cuid())
+  slug        String    @unique
+  title       String
+  description String
+  type        EventType
+  location    String
+  startAt     DateTime
+  endAt       DateTime
+  priceCents  Int
+  capacity    Int
+  coverImage  String
+  isPublished Boolean   @default(true)
+
+  bookings EventBooking[]
+}
+
+model EventBooking {
+  id              String        @id @default(cuid())
+  userId          String
+  eventId         String
+  seats           Int           @default(1)
+  status          BookingStatus @default(PENDING)
+  stripeSessionId String        @unique
+  createdAt       DateTime      @default(now())
+
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  @@index([eventId])
+}
+
+model Product {
+  id          String   @id @default(cuid())
+  slug        String   @unique
+  title       String
+  description String
+  priceCents  Int
+  images      String[]
+  stock       Int
+  category    String
+  isFeatured  Boolean  @default(false)
+  isPublished Boolean  @default(true)
+
+  orderItems OrderItem[]
+}
+
+model Order {
+  id              String      @id @default(cuid())
+  userId          String
+  status          OrderStatus @default(PENDING)
+  totalCents      Int
+  stripeSessionId String      @unique
+  createdAt       DateTime    @default(now())
+
+  user  User        @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items OrderItem[]
+}
+
+model OrderItem {
+  id         String @id @default(cuid())
+  orderId    String
+  productId  String
+  quantity   Int
+  priceCents Int
+
+  order   Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+}
