@@ -58,7 +58,7 @@ export async function POST(request: Request) {
       if (order && order.status === "PENDING") {
         await db.$transaction([
           db.order.update({ where: { id: order.id }, data: { status: "PAID" } }),
-          ...order.items.map((item) =>
+          ...order.items.map((item: (typeof order.items)[number]) =>
             db.product.update({
               where: { id: item.productId },
               data: { stock: { decrement: item.quantity } },
